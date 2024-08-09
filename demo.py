@@ -82,9 +82,10 @@ def run():
             inout = inout.cpu().detach().numpy()
             inout = 1 / (1 + np.exp(-inout))
             inout = (1 - inout) * 255
-            norm_map = imresize(raw_hm, (height, width)) - inout
+            norm_map = np.array(Image.fromarray(raw_hm).resize((height, width))) - inout
 
-            # vis
+
+            # visual
             plt.close()
             fig = plt.figure()
             fig.canvas.manager.window.move(0,0)
@@ -96,7 +97,7 @@ def run():
             ax.add_patch(rect)
 
             if args.vis_mode == 'arrow':
-                if inout < args.out_threshold: # in-frame gaze
+                if inout < args.out_threshold: # in-frame gazes
                     pred_x, pred_y = evaluation.argmax_pts(raw_hm)
                     norm_p = [pred_x/output_resolution, pred_y/output_resolution]
                     circ = patches.Circle((norm_p[0]*width, norm_p[1]*height), height/50.0, facecolor=(0,1,0), edgecolor='none')
