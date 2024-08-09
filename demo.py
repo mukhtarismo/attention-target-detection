@@ -9,7 +9,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 from PIL import Image
-from scipy.misc import imresize
+
 
 from model import ModelSpatial
 from utils import imutils, evaluation
@@ -46,12 +46,12 @@ def run():
 
     model = ModelSpatial()
     model_dict = model.state_dict()
-    pretrained_dict = torch.load(args.model_weights)
+    pretrained_dict = torch.load(args.model_weights, map_location=torch.device('cpu'))
     pretrained_dict = pretrained_dict['model']
     model_dict.update(pretrained_dict)
     model.load_state_dict(model_dict)
 
-    model.cuda()
+    model.to(torch.device('cpu'))
     model.train(False)
 
     with torch.no_grad():
@@ -69,9 +69,9 @@ def run():
             head_channel = imutils.get_head_box_channel(head_box[0], head_box[1], head_box[2], head_box[3], width, height,
                                                         resolution=input_resolution).unsqueeze(0)
 
-            head = head.unsqueeze(0).cuda()
-            frame = frame.unsqueeze(0).cuda()
-            head_channel = head_channel.unsqueeze(0).cuda()
+            head = head.unsqueeze(0).to(torch.device('cpu'))
+            frame = frame.unsqueeze(0).to(torch.device('cpu'))
+            head_channel = head_channel.unsqueeze(0).to(torch.device('cpu'))
 
             # forward pass
             raw_hm, _, inout = model(frame, head_channel, head)
@@ -88,7 +88,7 @@ def run():
             # visual
             plt.close()
             fig = plt.figure()
-            fig.canvas.manager.window.move(0,0)
+            #fig.canvas.manager.window.move(0,0)
             plt.axis('off')
             plt.imshow(frame_raw)
 
